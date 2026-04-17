@@ -1,4 +1,7 @@
-OpenRouter, limit = {}, {}
+-- i made this by using notepad so it could sometimes go wrong becuase i didnt debugged it 
+local OpenRouter = {}
+OpenRouter, limit = OpenRouter, {}
+
 local maxlimit = 2000
 local baseUrl = "https://router.huggingface.co/v1"
 local HttpService = game:GetService("HttpService")
@@ -11,10 +14,12 @@ else
   getgenv().IsLoaded = true
 end
 
-local httpquest = syn.request or syn or http_request
+local httpquest = syn.request or http_request or request
 
 function OpenRouter.newAI(AIModel, HK_API)
   getgenv().API = HK_API
+  hfToken = HK_API
+
   local new = {}
   setmetatable(new, { __index = OpenRouter })
 
@@ -27,6 +32,7 @@ function OpenRouter.newAI(AIModel, HK_API)
     }
 
     local body = HttpService:JSONEncode(payload)
+
     local data = {
       Url = baseUrl .. "/chat/completions",
       Method = "POST",
@@ -42,15 +48,15 @@ function OpenRouter.newAI(AIModel, HK_API)
       response = httpquest(data)
     end)
 
-    if success then
-      if response and response.StatusCode == 200 then
+    if success and response then
+      if response.StatusCode == 200 then
         local responseData = HttpService:JSONDecode(response.Body)
-        return responseData.choices[1].message
+        return responseData.choices[1].message.content
       else
-        warn("Request failed with status: " .. (response and response.StatusCode or "No response"))
+        warn("Request failed with status: " .. tostring(response.StatusCode))
       end
     else
-      warn("Error: " .. (errorMessage or "Unknown error"))
+      warn("Error: " .. tostring(errorMessage))
     end
   end
 
